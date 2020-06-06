@@ -1,0 +1,75 @@
+ZFS. Задание 1. Определить алгоритм с наилучшим сжатием
+
+
+Ответ: у lzjb сжатие чуть похуже, во всех других случаях - одинаковое. Может быть, на большем количестве файлов разница будет больше?
+Ниже, мои шаги
+
+
+NAME           USED  AVAIL     REFER  MOUNTPOINT
+storage        128K   320M     25.5K  /storage
+storage/data    24K   320M       24K  /storage/data
+[root@otusraid vagrant]# 
+[root@otusraid vagrant]# 
+[root@otusraid vagrant]# zfs create storage/data/1
+[root@otusraid vagrant]# zfs create storage/data/2
+[root@otusraid vagrant]# zfs create storage/data/3
+[root@otusraid vagrant]# zfs create storage/data/4
+[root@otusraid vagrant]# zfs --help
+usage: zfs command args ...
+
+
+For the property list, run: zfs set|get
+
+For the delegated permission list, run: zfs allow|unallow
+[root@otusraid vagrant]# 
+[root@otusraid vagrant]# 
+[root@otusraid vagrant]# 
+[root@otusraid vagrant]# zfs set compression=gzip storage/data/1
+[root@otusraid vagrant]# zfs set compression=gzip-N storage/data/2
+cannot set property for 'storage/data/2': 'compression' must be one of 'on | off | lzjb | gzip | gzip-[1-9] | zle | lz4'
+[root@otusraid vagrant]# zfs set compression=zle storage/data/2
+[root@otusraid vagrant]# zfs set compression=lzjb storage/data/2
+[root@otusraid vagrant]# zfs set compression=zle storage/data/2
+[root@otusraid vagrant]# zfs set compression=lzjb storage/data/3
+[root@otusraid vagrant]# zfs set compression=lz4 storage/data/4
+[root@otusraid vagrant]# zfs list
+NAME             USED  AVAIL     REFER  MOUNTPOINT
+storage          262K   320M     25.5K  /storage
+storage/data     124K   320M       28K  /storage/data
+storage/data/1    24K   320M       24K  /storage/data/1
+storage/data/2    24K   320M       24K  /storage/data/2
+storage/data/3    24K   320M       24K  /storage/data/3
+storage/data/4    24K   320M       24K  /storage/data/4
+[root@otusraid vagrant]# zfs get compression,compressratio
+NAME            PROPERTY       VALUE     SOURCE
+storage         compression    off       default
+storage         compressratio  1.00x     -
+storage/data    compression    off       default
+storage/data    compressratio  1.00x     -
+storage/data/1  compression    gzip      local
+storage/data/1  compressratio  1.00x     -
+storage/data/2  compression    zle       local
+storage/data/2  compressratio  1.00x     -
+storage/data/3  compression    lzjb      local
+storage/data/3  compressratio  1.00x     -
+storage/data/4  compression    lz4       local
+storage/data/4  compressratio  1.00x     -
+
+
+Скопировала файл Война и Мир:
+
+
+[root@otusraid vagrant]# zfs get compression,compressratio
+NAME            PROPERTY       VALUE     SOURCE
+storage         compression    off       default
+storage         compressratio  1.07x     -
+storage/data    compression    off       default
+storage/data    compressratio  1.08x     -
+storage/data/1  compression    gzip-9    local
+storage/data/1  compressratio  1.08x     -
+storage/data/2  compression    zle       local
+storage/data/2  compressratio  1.08x     -
+storage/data/3  compression    lzjb      local
+storage/data/3  compressratio  1.07x     -
+storage/data/4  compression    lz4       local
+storage/data/4  compressratio  1.08x     -

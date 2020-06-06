@@ -1,0 +1,23 @@
+3. Snapshot
+
+[root@otusraid vagrant]# zfs receive otus_task2.file 
+Error: Backup stream can not be read from a terminal.
+You must redirect standard input.
+
+
+[root@otusraid vagrant]# zfs create otus/storage
+[root@otusraid vagrant]# zfs receive otus/storage/task2  < otus_task2.file 
+
+[root@otusraid vagrant]# ls /otus/storage/task2/
+10M.file  Limbo.txt  Moby_Dick.txt  War_and_Peace.txt  cinderella.tar  for_examaple.txt  homework4.txt  task1  world.sql
+
+[root@otusraid vagrant]# ls /otus/storage/task2/task1/
+README  file_mess
+
+[root@otusraid vagrant]# ls /otus/storage/task2/task1/file_mess/ | grep sec
+8.2 El secreto de sus ojos (2009).mp4
+8.3 Witness for the Prosecution (1957).mp4
+secret_message
+
+[root@otusraid vagrant]# cat /otus/storage/task2/task1/file_mess/secret_message 
+https://github.com/sindresorhus/awesome
