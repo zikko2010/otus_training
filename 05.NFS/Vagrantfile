@@ -1,0 +1,91 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+MACHINES1 = {
+  :nfshost5 => {
+        :box_name => "centos/7",
+        :ip_addr => '192.168.11.150'
+  }
+}
+
+Vagrant.configure("2") do |config|
+
+  MACHINES1.each do |boxname, boxconfig|
+
+      config.vm.define boxname do |box|
+
+          box.vm.box = boxconfig[:box_name]
+          box.vm.host_name = boxname.to_s
+
+          #box.vm.network "forwarded_port", guest: 3260, host: 3260+offset
+
+          box.vm.network "private_network", ip: boxconfig[:ip_addr]
+
+          box.vm.provider :virtualbox do |vb|
+            vb.customize ["modifyvm", :id, "--memory", "200"]
+            # Подключаем дополнительные диски
+            #vb.customize ['createhd', '--filename', second_disk, '--format', 'VDI', '--size', 5 * 1024]
+            #vb.customize ['storageattach', :id, '--storagectl', 'IDE', '--port', 0, '--device', 1, '--type', 'hdd', '--medium', second_disk]
+          end
+          
+          box.vm.provision "shell", inline: <<-SHELL
+            mkdir -p ~root/.ssh
+            cp ~vagrant/.ssh/auth* ~root/.ssh
+            yum install -y nfs-utils
+            systemctl enable rpcbind nfs-server
+            systemctl start rpcbind nfs-server
+            mkdir /mnt/nfs_storage
+            chmod -R 777 /mnt/nfs_storage
+            echo "/mnt/nfs_storage 192.168.11.0/24(rw,sync,root_squash,no_all_squash)" > /etc/exports
+            exportfs -r
+            
+          SHELL
+
+      end
+  end
+end
+
+
+
+MACHINES2 = {
+  :nfsguest5 => {
+        :box_name => "centos/7",
+        :ip_addr => '192.168.11.151'
+  }
+}
+
+
+Vagrant.configure("2") do |config|
+
+  MACHINES2.each do |boxname, boxconfig|
+
+      config.vm.define boxname do |box|
+
+          box.vm.box = boxconfig[:box_name]
+          box.vm.host_name = boxname.to_s
+
+          #box.vm.network "forwarded_port", guest: 3260, host: 3260+offset
+
+          box.vm.network "private_network", ip: boxconfig[:ip_addr]
+
+          box.vm.provider :virtualbox do |vb|
+            vb.customize ["modifyvm", :id, "--memory", "200"]
+            # Подключаем дополнительные диски
+            #vb.customize ['createhd', '--filename', second_disk, '--format', 'VDI', '--size', 5 * 1024]
+            #vb.customize ['storageattach', :id, '--storagectl', 'IDE', '--port', 0, '--device', 1, '--type', 'hdd', '--medium', second_disk]
+          end
+          
+          box.vm.provision "shell", inline: <<-SHELL
+            mkdir -p ~root/.ssh
+            cp ~vagrant/.ssh/auth* ~root/.ssh
+            yum install -y nfs-utils
+            systemctl start rpcbind
+            systemctl enable rpcbind
+            mkdir /mnt/nfs_share
+            mount -t nfs -o vers=3 -o proto=udp 192.168.11.150:/mnt/nfs_storage/ /mnt/nfs_share/
+            
+          SHELL
+
+      end
+  end
+end
