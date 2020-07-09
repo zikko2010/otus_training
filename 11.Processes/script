@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+echo "PID | PPid | STATUS | NAME"
+awk '{ print $1 "\t" $4 "\t" $3"\t" $2}' /proc/[0-9]*/stat | sort -g
+
