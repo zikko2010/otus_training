@@ -1,0 +1,9 @@
+---
+# handlers file
+
+    - name: restart sshd
+      systemd:
+        name: sshd.service
+        state: restarted
+        enabled: yes
+

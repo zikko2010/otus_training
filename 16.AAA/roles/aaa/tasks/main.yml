@@ -1,0 +1,36 @@
+---
+# tasks file for creating user
+
+    - name: AAA | Add users with 
+      user:
+        name: "{{ item }}"
+        password: "{{ password | password_hash('sha512') }}"
+        state: present
+      loop:
+        - day
+        - night
+        - friday
+       
+    - name: Update sshd_config
+      lineinfile: 
+       path: "/etc/ssh/sshd_config"
+       line: 'PasswordAuthentication'
+       regexp: 'PasswordAuthentication yes'
+       
+    - name: Add time for accessing server
+      lineinfile: 
+       path: "/etc/security/time.conf"
+       insertafter: '# End of example file.'
+       line: '*;*;day|night|friday;Wk0800-2000'
+       
+    - name: Add pam_time module
+      lineinfile: 
+       path: "/etc/pam.d/sshd"
+       insertafter: 'account    required     pam_nologin.so'
+       line: 'account    required     pam_time.so'
+       
+
+
+
+
+
